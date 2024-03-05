@@ -1,8 +1,13 @@
 <script lang="ts">
 	import Papa from "papaparse";
 	import "../electron.d.ts";
+	import Table from "./lib/Table.svelte";
 
 	let data: { [x: string]: any };
+	let tableArray: {
+		name: string;
+		surname: string;
+	}[] = [];
 
 	const openFilePicker = () => {
 		return new Promise<File>((resolve) => {
@@ -25,7 +30,11 @@
 			complete: (result) => {
 				data = result.data;
 				for (let key in data) {
-					console.log(key, data[key]);
+					tableArray.push({
+						name: data[key][0],
+						surname: data[key][1],
+					});
+					console.log(tableArray);
 				}
 			},
 		});
@@ -39,20 +48,34 @@
 <main
 	class="min-h-screen bg-slate-900 text-white flex flex-col items-center justify-center"
 >
-	<div class="flex flex-col items-center">
-		<button class="btn btn-primary" on:click={handleClick}>Load CSV</button>
-		{#if data}
-			<p class="text-green-400">CSV loaded</p>
-		{:else}
-			<h1 class="">Load your CSV file</h1>
-		{/if}
-
-		<div class="mt-10 flex flex-col items-center">
-			<button
-				class="btn btn-success"
-				disabled={!data}
-				on:click={handleGenerateVideos}>Generate videos</button
+	<div class="flex flex-row items-center justify-center ml-10">
+		<div class="flex flex-col items-center">
+			<button class="btn btn-primary" on:click={handleClick}
+				>Load CSV</button
 			>
+			{#if data}
+				<div class="flex flex-row">
+					<p class="text-green-400">CSV loaded</p>
+					<button on:click={() => (data = undefined)}>
+						<p class="text-red-700 ml-2">x</p>
+					</button>
+				</div>
+			{:else}
+				<h1 class="">Load your CSV file</h1>
+			{/if}
 		</div>
+
+		{#if data}
+			<div class="ml-10">
+				<Table rows={tableArray} />
+			</div>
+			<div class="ml-10 flex flex-col items-center">
+				<button
+					class="btn btn-success"
+					disabled={!data}
+					on:click={handleGenerateVideos}>Generate videos</button
+				>
+			</div>
+		{/if}
 	</div>
 </main>
