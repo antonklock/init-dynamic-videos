@@ -3,33 +3,69 @@ const ae = require('after-effects');
 const createDynamicVideos = async () => {
     try {
         ae(() => {
-            alert('Hello world!');
-
             var proj = app.project;
 
             var csvPath = selectCSVFile();
             var CSVData = importCSV(csvPath);
+            var outputFolder = setOutputFolder();
+
+            var videoComp = "VIDEO";
+            var textComp = "TEXT";
+            var skippedJobs = [];
 
             for (var i = 0; i < CSVData.length; i++) {
-                var text = CSVData[i].Name + " " + CSVData[i].Surname;
-                var newVideo = getVideoByName(CSVData[i].ID + ".mp4");
+                var text = CSVData[i].Efternamn;
+
+                //TODO: CHANGE FROM "FÖRNAMN" TO "NAME"
+                var newVideo = getVideoByName(CSVData[i].Förnamn + ".mp4");
                 var mainComp = getCompByName("Main");
-                var textLayer = getLayerByName(mainComp, "TEXT");
-                var videoLayer = getLayerByName(mainComp, "VIDEO");
-                setSourceText(textLayer, text);
-                setVideoSource(videoLayer, newVideo);
 
-                var renderQueue = app.project.renderQueue;
-                renderQueue.items.add(mainComp);
-                renderQueue.queueInAME(false);
+                var textComp = getCompByName("TEXT");
+                var textLayer = getLayerByIndex(textComp, 1);
 
-                clearRenderQueue();
+                var videoComp = getCompByName("VIDEO");
+                var videoLayer = getLayerByIndex(videoComp, 1);
+
+                if (text && newVideo && mainComp && textLayer && videoLayer) {
+                    setSourceText(textLayer, text);
+                    setVideoSource(videoLayer, newVideo);
+
+                    sendCompToAME(mainComp, false);
+                    clearRenderQueue();
+                } else {
+                    skippedJobs.push(CSVData[i].Förnamn + " " + CSVData[i].Efternamn);
+                    continue;
+                }
             }
 
-            alert("All jobs sent to Media Encoder!");
+            if (skippedJobs.length > 0) {
+                alert("The following jobs were skipped: " + skippedJobs.join(", "));
+            } else {
+                alert("All jobs sent to Adobe Media Encoder!");
+            }
+
+            function setOutputFolder() {
+                var outputFolder = Folder.selectDialog("Select Output Folder");
+                if (outputFolder === null) {
+                    alert("No output folder selected. Script will terminate.");
+                    return null;
+                } else {
+                    return outputFolder.fsName;
+                }
+            }
+
+            function sendCompToAME(comp, renderImmediately) {
+                var renderQueue = app.project.renderQueue;
+                var renderItem = renderQueue.items.add(comp);
+                var outputModule = renderItem.outputModule(1);
+                outputModule.applyTemplate("H.264 - Match Render Settings - 40 Mbps");
+                outputModule.file = new File(outputFolder + "/" + CSVData[i].Förnamn + "_" + CSVData[i].Efternamn + ".mp4");
+                renderQueue.queueInAME(renderImmediately);
+            }
 
             function clearRenderQueue() {
-                var queueLength = renderQueue.numItems;
+                var queueLength = app.project.renderQueue.numItems;
+                var renderQueue = app.project.renderQueue;
                 for (var i = queueLength; i >= 1; i--) {
                     var renderQueueItem = renderQueue.item(i);
                     renderQueueItem.remove();
@@ -56,12 +92,20 @@ const createDynamicVideos = async () => {
                 return null;
             }
 
+            function getLayerByIndex(comp, index) {
+                return comp.layer(index);
+            }
+
             function setSourceText(layer, text) {
-                layer.sourceText.setValue(text);
+                if (text) {
+                    layer.sourceText.setValue(text);
+                }
             }
 
             function setVideoSource(layer, video) {
-                layer.replaceSource(video, true);
+                if (video) {
+                    layer.replaceSource(video, true);
+                }
             }
 
             function getVideoByName(videoName) {
@@ -81,7 +125,7 @@ const createDynamicVideos = async () => {
                     alert("No CSV file selected. Script will terminate.");
                     return null;
                 } else {
-                    return csvFile.fsName;
+                    return csvFile.fsName; // Return the file path
                 }
             }
 
