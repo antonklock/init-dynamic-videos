@@ -34,6 +34,8 @@
     "vite": "^4.3.2"
   },
   "dependencies": {
-    "electron-squirrel-startup": "^1.0.0"
+    "after-effects": "^0.4.15",
+    "electron-squirrel-startup": "^1.0.0",
+    "papaparse": "^5.4.1"
   }
 }

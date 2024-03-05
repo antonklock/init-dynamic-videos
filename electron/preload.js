@@ -1,9 +1,13 @@
-const { contextBridge } = require('electron')
+const { contextBridge, ipcRenderer } = require('electron')
 
-const api = {
-    node: () => process.versions.node,
-    chrome: () => process.versions.chrome,
-    electron: () => process.versions.electron
-}
+contextBridge.exposeInMainWorld('electronAPI', {
+    generateVideos: () => ipcRenderer.send('generate-videos')
+})
 
-contextBridge.exposeInMainWorld('api', api)
+// const api = {
+//     node: () => process.versions.node,
+//     chrome: () => process.versions.chrome,
+//     electron: () => process.versions.electron
+// }
+
+// contextBridge.exposeInMainWorld('api', api)
