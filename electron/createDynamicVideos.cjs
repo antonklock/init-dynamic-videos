@@ -8,6 +8,7 @@ const createDynamicVideos = async () => {
             var csvPath = selectCSVFile();
             var CSVData = importCSV(csvPath);
             var outputFolder = setOutputFolder();
+            var thumbnailFrame = setThumbnailFrame();
 
             var videoComp = "VIDEO";
             var textComp = "TEXT";
@@ -30,7 +31,9 @@ const createDynamicVideos = async () => {
                     setSourceText(textLayer, text);
                     setVideoSource(videoLayer, newVideo);
 
-                    sendCompToAME(mainComp, false);
+                    renderThumbnail(mainComp, convertFrameToTime(mainComp.frameRate, thumbnailFrame));
+                    sendToAME(mainComp, false);
+
                     clearRenderQueue();
                 } else {
                     skippedJobs.push(CSVData[i].Förnamn + " " + CSVData[i].Efternamn);
@@ -44,6 +47,36 @@ const createDynamicVideos = async () => {
                 alert("All jobs sent to Adobe Media Encoder!");
             }
 
+            function renderThumbnail(comp, time) {
+                var imageFile = new File(outputFolder + "/" + CSVData[i].Förnamn + "_" + CSVData[i].Efternamn + "_THUMB.png");
+                comp.saveFrameToPng(time, imageFile);
+            }
+
+            function convertFrameToTime(frameRate, frame) {
+                return frame / frameRate;
+            }
+
+            function setThumbnailFrame() {
+                var thumbnailFrame = prompt("Enter the frame number for the thumbnail", "1");
+                if (thumbnailFrame === null) {
+                    alert("No frame number entered. Script will terminate.");
+                    return null;
+                } else {
+                    if (!isNumeric(thumbnailFrame)) {
+                        alert("Invalid frame number entered. Script will terminate.");
+                        return null;
+                    } else {
+                        return Number(thumbnailFrame);
+                    }
+                }
+            }
+
+            function isNumeric(str) {
+                if (typeof str != "string") return false
+                return !isNaN(str) &&
+                    !isNaN(parseFloat(str))
+            }
+
             function setOutputFolder() {
                 var outputFolder = Folder.selectDialog("Select Output Folder");
                 if (outputFolder === null) {
@@ -54,12 +87,14 @@ const createDynamicVideos = async () => {
                 }
             }
 
-            function sendCompToAME(comp, renderImmediately) {
+            function sendToAME(comp, renderImmediately) {
                 var renderQueue = app.project.renderQueue;
                 var renderItem = renderQueue.items.add(comp);
                 var outputModule = renderItem.outputModule(1);
-                outputModule.applyTemplate("H.264 - Match Render Settings - 40 Mbps");
+                outputModule.applyTemplate("H264");
+
                 outputModule.file = new File(outputFolder + "/" + CSVData[i].Förnamn + "_" + CSVData[i].Efternamn + ".mp4");
+
                 renderQueue.queueInAME(renderImmediately);
             }
 

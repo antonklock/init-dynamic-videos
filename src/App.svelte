@@ -2,11 +2,13 @@
 	import Papa from "papaparse";
 	import "../electron.d.ts";
 	import Table from "./lib/Table.svelte";
+	import { tableData } from "./lib/stores/tableStore.js";
 
 	let data: { [x: string]: any };
 	let tableArray: {
 		name: string;
 		surname: string;
+		checked: boolean;
 	}[] = [];
 
 	const openFilePicker = () => {
@@ -33,8 +35,11 @@
 					tableArray.push({
 						name: data[key][0],
 						surname: data[key][1],
+						checked: false,
 					});
-					console.log(tableArray);
+
+					tableData.update((n) => tableArray);
+					// console.log(tableArray);
 				}
 			},
 		});

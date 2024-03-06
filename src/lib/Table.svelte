@@ -1,10 +1,28 @@
 <script lang="ts">
     import TableRow from "./TableRow.svelte";
+    import { checkAll, tableData } from "./stores/tableStore";
+
+    let check_all = false;
+
+    try {
+        tableData.subscribe((value) => {
+            rows = value;
+        });
+    } catch (e) {
+        console.log(e);
+    }
+
+    checkAll.subscribe((value) => {
+        check_all = value;
+    });
 
     export let rows: {
         name: string;
         surname: string;
+        checked: boolean;
     }[];
+
+    $: console.log(rows);
 </script>
 
 {#if rows}
@@ -17,6 +35,10 @@
                         <input
                             type="checkbox"
                             class="checkbox checkbox-primary checkbox-xs"
+                            on:change={() => {
+                                checkAll.update((n) => !n);
+                            }}
+                            bind:checked={check_all}
                         />
                     </th>
                     <th>Name</th>
@@ -29,22 +51,19 @@
                         rowNumber={i + 1 + ""}
                         name={row.name}
                         surname={row.surname}
+                        checked={row.checked}
                     />
                 {/each}
             </tbody>
-            <!-- <tfoot>
-                <tr>
-                    <th>Number</th>
-                    <th>
-                        <input
-                            type="checkbox"
-                            class="checkbox checkbox-primary checkbox-xs"
-                        />
-                    </th>
-                    <th>Name</th>
-                    <th>Surname</th>
-                </tr>
-            </tfoot> -->
         </table>
     </div>
+
+    <button
+        class="btn btn-error"
+        on:click={() => {
+            console.log($tableData);
+        }}
+    >
+        Print table
+    </button>
 {/if}
