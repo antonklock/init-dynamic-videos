@@ -15,7 +15,7 @@
 </script>
 
 {#if $tableDataStore}
-    <div class="overflow-x-hidden w-80 h-64">
+    <div class="overflow-x-hidden w-96 h-80">
         <table class="table table-xs table-pin-rows">
             <thead>
                 <tr>
@@ -27,7 +27,6 @@
                             on:change={toggleCheckAll}
                             bind:checked
                         />
-                        <span class="ml-2">Render</span>
                     </th>
                     <th>Name</th>
                     <th>Surname</th>
