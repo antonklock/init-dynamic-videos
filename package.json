@@ -36,6 +36,7 @@
   "dependencies": {
     "after-effects": "^0.4.15",
     "electron-squirrel-startup": "^1.0.0",
-    "papaparse": "^5.4.1"
+    "papaparse": "^5.4.1",
+    "uuid": "^9.0.1"
   }
 }

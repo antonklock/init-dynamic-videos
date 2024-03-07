@@ -1,53 +1,42 @@
 <script lang="ts">
     import TableRow from "./TableRow.svelte";
-    import { checkAll, tableData } from "./stores/tableStore";
+    import { tableDataStore } from "../../stores/tableStore";
 
-    let check_all = false;
+    let checked = true;
 
-    try {
-        tableData.subscribe((value) => {
-            rows = value;
+    const toggleCheckAll = () => {
+        tableDataStore.update((currentData) => {
+            return currentData.map((row) => {
+                row.checked = !checked;
+                return row;
+            });
         });
-    } catch (e) {
-        console.log(e);
-    }
-
-    checkAll.subscribe((value) => {
-        check_all = value;
-    });
-
-    export let rows: {
-        name: string;
-        surname: string;
-        checked: boolean;
-    }[];
-
-    $: console.log(rows);
+    };
 </script>
 
-{#if rows}
+{#if $tableDataStore}
     <div class="overflow-x-hidden w-80 h-64">
         <table class="table table-xs table-pin-rows">
             <thead>
                 <tr>
                     <th>#</th>
-                    <th>
+                    <th class="flex flex-row items-center">
                         <input
                             type="checkbox"
                             class="checkbox checkbox-primary checkbox-xs"
-                            on:change={() => {
-                                checkAll.update((n) => !n);
-                            }}
-                            bind:checked={check_all}
+                            on:change={toggleCheckAll}
+                            bind:checked
                         />
+                        <span class="ml-2">Render</span>
                     </th>
                     <th>Name</th>
                     <th>Surname</th>
                 </tr>
             </thead>
             <tbody>
-                {#each rows as row, i}
+                {#each $tableDataStore as row, i}
                     <TableRow
+                        id={row.id}
                         rowNumber={i + 1 + ""}
                         name={row.name}
                         surname={row.surname}
@@ -57,13 +46,4 @@
             </tbody>
         </table>
     </div>
-
-    <button
-        class="btn btn-error"
-        on:click={() => {
-            console.log($tableData);
-        }}
-    >
-        Print table
-    </button>
 {/if}

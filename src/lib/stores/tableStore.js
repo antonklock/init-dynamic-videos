@@ -1,4 +1,4 @@
 import { writable } from "svelte/store";
 
-export const checkAll = writable(false);
-export const tableData = writable([]);
+export const checkAllStore = writable(true);
+export const tableDataStore = writable([]);
