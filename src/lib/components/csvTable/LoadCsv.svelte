@@ -34,7 +34,6 @@
                         },
                     ]);
                 }
-                console.log($tableDataStore);
             },
         });
     };
@@ -49,7 +48,5 @@
                 <p class="text-red-700 ml-2">x</p>
             </button>
         </div>
-    {:else}
-        <h1 class="">Load your CSV file</h1>
     {/if}
 </div>
